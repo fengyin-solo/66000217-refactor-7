@@ -9,9 +9,7 @@
 </template>
 
 <script setup lang="ts">
+import { DOT_POSITIONS as dotPos } from '../utils/braille'
+
 defineProps<{ dots: number[]; size: number }>()
-const dotPos: Record<number, [number, number]> = {
-  1: [0, 0], 2: [0, 1], 3: [0, 2],
-  4: [1, 0], 5: [1, 1], 6: [1, 2],
-}
 </script>

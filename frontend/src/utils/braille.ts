@@ -1,4 +1,5 @@
 // English Braille Grade 1 mapping
+// 字符与六个圆点配对关系的唯一对照表：新增字符只需改这一处。
 export const BRAILLE_MAP: Record<string, number[]> = {
   'A': [1], 'B': [1,2], 'C': [1,4], 'D': [1,4,5], 'E': [1,5],
   'F': [1,2,4], 'G': [1,2,4,5], 'H': [1,2,5], 'I': [2,4], 'J': [2,4,5],
@@ -10,18 +11,29 @@ export const BRAILLE_MAP: Record<string, number[]> = {
 }
 
 // Dot positions in 2x3 grid (col, row): 1=(0,0), 2=(0,1), 3=(0,2), 4=(1,0), 5=(1,1), 6=(1,2)
+// 六个圆点在 2x3 网格中位置的唯一定义：调整圆点布局只需改这一处。
 export const DOT_POSITIONS: Record<number, [number, number]> = {
   1: [0, 0], 2: [0, 1], 3: [0, 2],
   4: [1, 0], 5: [1, 1], 6: [1, 2],
 }
 
+// 字符 → 该字符点亮的圆点；未登记的字符按空点处理
+export function charToDots(ch: string): number[] {
+  return BRAILLE_MAP[ch] || []
+}
+
+// 两组圆点是否相同（忽略点选/排列顺序），答题判定与反向查找共用
+export function sameDots(a: number[], b: number[]): boolean {
+  return JSON.stringify([...a].sort()) === JSON.stringify([...b].sort())
+}
+
 export function textToBraille(text: string): number[][] {
-  return text.toUpperCase().split('').map(c => BRAILLE_MAP[c] || [])
+  return text.toUpperCase().split('').map(charToDots)
 }
 
 export function brailleToText(dots: number[]): string {
   for (const [char, d] of Object.entries(BRAILLE_MAP)) {
-    if (JSON.stringify(d.sort()) === JSON.stringify([...dots].sort())) return char
+    if (sameDots(d, dots)) return char
   }
   return '?'
 }
