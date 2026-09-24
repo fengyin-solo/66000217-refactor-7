@@ -1,6 +1,8 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { BRAILLE_MAP, textToBraille, brailleToText, dotsToUnicode } from '../utils/braille'
+import {
+  textToBraille, charForDots, dotsForChar, dotsToUnicode, isSameDots,
+} from '../utils/braille'
 import type { LearnMode } from '../types'
 
 export const useBrailleStore = defineStore('braille', () => {
@@ -21,8 +23,7 @@ export const useBrailleStore = defineStore('braille', () => {
   }
 
   function reverseTranslate() {
-    // Simple: take selectedDots and find matching char
-    return brailleToText(selectedDots.value)
+    return charForDots(selectedDots.value)
   }
 
   function generateQuiz() {
@@ -38,7 +39,7 @@ export const useBrailleStore = defineStore('braille', () => {
   }
 
   function checkQuizAnswer() {
-    const correct = JSON.stringify([...selectedDots.value].sort()) === JSON.stringify([...(BRAILLE_MAP[quizChar.value] || [])].sort())
+    const correct = isSameDots(selectedDots.value, dotsForChar(quizChar.value))
     score.value.total++
     if (correct) score.value.correct++
     history.value.unshift({ input: quizChar.value, correct })
@@ -55,7 +56,7 @@ export const useBrailleStore = defineStore('braille', () => {
     const lines = inputText.value.toUpperCase().split('')
     let out = '盲文翻译输出\n\n'
     for (const ch of lines) {
-      const dots = BRAILLE_MAP[ch] || []
+      const dots = dotsForChar(ch)
       out += `${ch} → [${dots.join(',')}] ${dotsToUnicode(dots)}\n`
     }
     return out
